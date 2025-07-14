@@ -1,0 +1,27 @@
+body.bg-gradient-primary {
+    background: linear-gradient(135deg, #ff9800 0%, #ff5e62 100%);
+    min-height: 100vh;
+}
+.operation-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0e3 100%);
+}
+.operation-card:hover {
+    transform: scale(1.05) rotate(-2deg);
+    box-shadow: 0 8px 32px 0 rgba(255, 152, 0, 0.2);
+    background: linear-gradient(135deg, #ffe0b2 0%, #ffcccb 100%);
+}
+.btn-warning {
+    background: linear-gradient(90deg, #ff9800 0%, #ff5e62 100%);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 4px 16px 0 rgba(255, 94, 98, 0.2);
+}
+.btn-warning:hover {
+    background: linear-gradient(90deg, #ff5e62 0%, #ff9800 100%);
+    color: #fff;
+} 

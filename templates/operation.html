@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Operation - Bhai ka Pdf</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="text-center mb-4 fw-bold text-primary">Choose Your PDF Operation</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 justify-content-center">
+            <div class="col d-flex align-items-stretch">
+                <div class="card operation-card w-100 text-center animate__animated animate__zoomIn" data-operation="merge">
+                    <div class="card-body">
+                        <h5 class="card-title">Merge PDFs</h5>
+                        <p class="card-text">Combine multiple PDFs into one.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-items-stretch">
+                <div class="card operation-card w-100 text-center animate__animated animate__zoomIn" data-operation="split">
+                    <div class="card-body">
+                        <h5 class="card-title">Split PDF</h5>
+                        <p class="card-text">Extract pages or split your PDF.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-items-stretch">
+                <div class="card operation-card w-100 text-center animate__animated animate__zoomIn" data-operation="delete">
+                    <div class="card-body">
+                        <h5 class="card-title">Delete Pages</h5>
+                        <p class="card-text">Remove unwanted pages from your PDF.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-items-stretch">
+                <div class="card operation-card w-100 text-center animate__animated animate__zoomIn" data-operation="compress">
+                    <div class="card-body">
+                        <h5 class="card-title">Compress PDF</h5>
+                        <p class="card-text">Reduce PDF file size.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex align-items-stretch">
+                <div class="card operation-card w-100 text-center animate__animated animate__zoomIn" data-operation="watermark">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Watermark</h5>
+                        <p class="card-text">Add custom watermark to your PDF.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <form id="uploadForm" class="mt-4 d-none" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="operation" id="selectedOperation">
+                    {% if last_result %}
+                        <div class="alert alert-info">Using your last processed PDF as input for the next operation.</div>
+                    {% else %}
+                        <div class="mb-3">
+                            <label for="pdfFile" class="form-label">Upload PDF File(s)</label>
+                            <input class="form-control" type="file" id="pdfFile" name="pdfFile" accept="application/pdf" multiple required>
+                        </div>
+                    {% endif %}
+                    <div class="mb-3 d-none" id="deletePagesInput">
+                        <label for="deletePages" class="form-label">Pages to Delete (e.g. 2,4,5 or 2-4)</label>
+                        <input type="text" class="form-control" id="deletePages" name="deletePages" placeholder="2,4,5 or 2-4">
+                    </div>
+                    <div class="mb-3 d-none" id="splitRangesInput">
+                        <label for="splitRanges" class="form-label">Page Ranges to Split (e.g. 1-3,4-6)</label>
+                        <input type="text" class="form-control" id="splitRanges" name="splitRanges" placeholder="1-3,4-6">
+                    </div>
+                    <div class="mb-3 d-none" id="watermarkTextInput">
+                        <label for="watermarkText" class="form-label">Watermark Text</label>
+                        <input type="text" class="form-control" id="watermarkText" name="watermarkText" placeholder="Enter watermark text">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</body>
+</html> 
