@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Page Remover</title>
+    <!-- Color palette and fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 40px 30px;
+            width: 350px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #2575fc;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: box-shadow 0.3s;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus {
+            box-shadow: 0 0 5px #2575fc;
+        }
+
+        button {
+            background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 16px rgba(31, 38, 135, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25);
+        }
+
+        .info {
+            color: #6a11cb;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>PDF Page Remover</h1>
+        <!-- <div class="info">Upload a PDF, enter pages to remove (e.g. 2,4,7), and download the result.</div> -->
+        <input type="file" id="pdfInput" accept="application/pdf">
+        <input type="text" id="pagesInput" placeholder="Pages to remove (e.g. 2,4,7)">
+        <input type="text" id="outputName" placeholder="Output PDF name (e.g. result.pdf)">
+        <button id="removeBtn">Remove Pages & Download</button>
+        <div id="message"></div>
+    </div>
+    <!-- PDF.js and pdf-lib CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script>
+        const pdfInput = document.getElementById('pdfInput');
+        const pagesInput = document.getElementById('pagesInput');
+        const outputName = document.getElementById('outputName');
+        const removeBtn = document.getElementById('removeBtn');
+        const message = document.getElementById('message');
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = type;
+        }
+
+        removeBtn.onclick = async () => {
+            showMessage('', '');
+            const file = pdfInput.files[0];
+            if (!file) {
+                showMessage('Please upload a PDF file.', 'error');
+                return;
+            }
+            let pagesToRemove = pagesInput.value.trim();
+            if (!pagesToRemove) {
+                showMessage('Please enter page numbers to remove.', 'error');
+                return;
+            }
+            let outputFileName = outputName.value.trim();
+            if (!outputFileName) {
+                outputFileName = 'modified.pdf';
+            }
+            // Parse page numbers
+            let removePages = pagesToRemove.split(',').map(p => parseInt(p.trim(), 10)).filter(p => !isNaN(p));
+            if (removePages.length === 0) {
+                showMessage('Invalid page numbers.', 'error');
+                return;
+            }
+            showMessage('Processing PDF...', 'info');
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                const totalPages = pdfDoc.getPageCount();
+                // Remove duplicates and out-of-range
+                removePages = Array.from(new Set(removePages)).filter(p => p >= 1 && p <= totalPages);
+                if (removePages.length === 0) {
+                    showMessage('No valid pages to remove.', 'error');
+                    return;
+                }
+                // Create new PDF
+                const newPdfDoc = await PDFLib.PDFDocument.create();
+                for (let i = 0; i < totalPages; i++) {
+                    if (!removePages.includes(i + 1)) {
+                        const [copiedPage] = await newPdfDoc.copyPages(pdfDoc, [i]);
+                        newPdfDoc.addPage(copiedPage);
+                    }
+                }
+                if (newPdfDoc.getPageCount() === 0) {
+                    showMessage('All pages removed. Nothing to download.', 'error');
+                    return;
+                }
+                const pdfBytes = await newPdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = outputFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showMessage('PDF ready! Download started.', 'success');
+                // Reset all inputs
+                pdfInput.value = '';
+                pagesInput.value = '';
+                outputName.value = '';
+            } catch (err) {
+                showMessage('Error processing PDF: ' + err.message, 'error');
+            }
+        };
+    </script>
+</body>
+
+</html>
